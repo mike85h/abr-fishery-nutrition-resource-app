@@ -6,6 +6,18 @@ export default function RegionPage() {
   const [fishList, setFishList] = useState([]);
   const [regionInfo, setRegionInfo] = useState({});
 
+  	function extractText(raw) {
+  		// 1) decode Unicode escapes (\u003C → '<', etc.)
+  		const decoded = raw.replace(/\\u([\dA-F]{4})/gi, (_, hex) =>
+    		String.fromCharCode(parseInt(hex, 16))
+  		);
+  
+  		// 2) parse as HTML and grab textContent
+  		const container = document.createElement('div');
+  		container.innerHTML = decoded;
+  		return container.textContent.trim();
+	}
+
   useEffect(() => {
 
     fetch('http://localhost:5001/gofish?apikey=abrradiology')
@@ -28,6 +40,8 @@ export default function RegionPage() {
           avgCalories,
           avgFat
         });
+
+		
       });
 
   }, [regionName]);
@@ -44,6 +58,7 @@ export default function RegionPage() {
             {fish.ImageGallery?.[0]?.src && <img src={fish.ImageGallery[0].src} alt={fish.ImageGallery[0].alt} width="150" />}
             <p>Calories Per Serving: {fish.Calories}</p>
             <p>Fat Per Serving: {fish.FatTotal}</p>
+			<p>Description: {extractText(fish.Biology)}</p>
           </li>
         ))}
       </ul>
